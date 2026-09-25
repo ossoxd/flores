@@ -7,7 +7,7 @@ const appShell = document.querySelector("#app-shell");
 const backgroundMusic = document.querySelector("#background-music");
 const musicToggle = document.querySelector("#music-toggle");
 
-const MUSIC_VOLUME = 0.12;
+const MUSIC_VOLUME = 0.25;
 const MUSIC_FADE_MS = 2600;
 
 let gameStarted = false;
