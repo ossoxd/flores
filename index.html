@@ -3,18 +3,52 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="theme-color" content="#fff7e8" />
+    <meta name="theme-color" content="#0a0908" />
     <title>Un jardín para ti</title>
     <link rel="stylesheet" href="/src/styles.css" />
   </head>
   <body>
-    <main class="app-shell">
+    <section id="intro-overlay" class="intro-overlay" aria-label="Introducción">
+      <video
+        id="intro-video"
+        class="intro-video"
+        src="/assets/intro/intro.mp4"
+        playsinline
+        preload="auto"
+      ></video>
+
+      <div class="intro-actions">
+        <button id="intro-start" class="intro-start" type="button">
+          Entrar al jardín 🌻
+        </button>
+        <p id="intro-hint" class="intro-hint">Toca para comenzar con sonido</p>
+      </div>
+
+      <button id="intro-skip" class="intro-skip" type="button" hidden>
+        Saltar intro
+      </button>
+    </section>
+
+    <audio id="background-music" src="/assets/audio/background.mp3" loop preload="metadata"></audio>
+    <button
+      id="music-toggle"
+      class="music-toggle"
+      type="button"
+      aria-pressed="true"
+      aria-label="Desactivar música"
+      hidden
+    >
+      ♫ Música: ON
+    </button>
+
+    <main id="app-shell" class="app-shell app-shell--waiting" aria-hidden="true">
       <p id="loading-status" role="status" aria-live="polite">Cargando el jardín…</p>
       <div id="game-root" aria-label="Juego de flores amarillas"></div>
       <p class="game-help">Mover: WASD o flechas · Hablar: Enter · Saltar: Espacio</p>
       <p class="orientation-hint">Gira tu teléfono para jugar cómodamente 🌻</p>
     </main>
+
     <script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
-    <script type="module" src="/src/main.js"></script>
+    <script type="module" src="/src/intro.js"></script>
   </body>
 </html>

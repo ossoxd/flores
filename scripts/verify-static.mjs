@@ -6,7 +6,10 @@ const requiredProjectFiles = [
   "index.html",
   "src/main.js",
   "src/styles.css",
+  "src/intro.js",
   "src/config/gameConfig.js",
+  "public/assets/intro/intro.mp4",
+  "public/assets/audio/background.mp3",
   "public/assets/carrot-island/carrot island - free pack/carrot island - free pack/tileset/autumn.png",
   "public/assets/carrot-island/carrot island - free pack/carrot island - free pack/character/bunnyidle.png",
   "public/assets/carrot-island/carrot island - free pack/carrot island - free pack/character/bunnyrun.png"

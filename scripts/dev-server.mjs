@@ -1,4 +1,4 @@
-﻿import { createServer } from "node:http";
+import { createServer } from "node:http";
 import { readFile, stat } from "node:fs/promises";
 import { extname, join, normalize, resolve } from "node:path";
 import { resolveStaticRequest } from "../src/core/staticPaths.js";
@@ -28,7 +28,9 @@ const mimeTypes = {
   ".html": "text/html; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
   ".json": "application/json; charset=utf-8",
-  ".png": "image/png"
+  ".png": "image/png",
+  ".mp3": "audio/mpeg",
+  ".mp4": "video/mp4"
 };
 
 createServer(async (request, response) => {

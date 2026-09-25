@@ -433,3 +433,135 @@ body {
     display: none;
   }
 }
+
+
+/* Intro cinematográfica y música ambiental */
+.app-shell--waiting {
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.intro-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #050403;
+  opacity: 1;
+  transition: opacity 500ms ease;
+  touch-action: manipulation;
+}
+
+.intro-overlay--leaving {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.intro-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #050403;
+}
+
+.intro-actions {
+  position: relative;
+  z-index: 2;
+  display: grid;
+  justify-items: center;
+  gap: 0.7rem;
+  padding: 1.1rem;
+}
+
+.intro-start,
+.intro-skip,
+.music-toggle {
+  border: 3px solid #f0c95d;
+  color: #fff7dc;
+  background: rgb(38 28 20 / 82%);
+  box-shadow: 0 5px 0 #6f4d28;
+  font: 700 0.95rem/1.1 "Segoe UI", system-ui, sans-serif;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.intro-start {
+  min-width: 210px;
+  padding: 0.9rem 1.2rem;
+  border-radius: 12px;
+  font-size: 1.05rem;
+}
+
+.intro-start:hover,
+.intro-skip:hover,
+.music-toggle:hover {
+  filter: brightness(1.08);
+}
+
+.intro-start:active,
+.intro-skip:active,
+.music-toggle:active {
+  transform: translateY(2px);
+  box-shadow: 0 3px 0 #6f4d28;
+}
+
+.intro-start:disabled {
+  cursor: default;
+  opacity: 0.8;
+}
+
+.intro-hint {
+  margin: 0;
+  padding: 0.35rem 0.65rem;
+  border-radius: 999px;
+  color: #fff4cf;
+  background: rgb(0 0 0 / 55%);
+  font-size: 0.78rem;
+  text-align: center;
+}
+
+.intro-skip {
+  position: absolute;
+  right: max(14px, env(safe-area-inset-right));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 3;
+  padding: 0.65rem 0.9rem;
+  border-width: 2px;
+  border-radius: 9px;
+  opacity: 0.84;
+}
+
+.music-toggle {
+  position: fixed;
+  top: max(10px, env(safe-area-inset-top));
+  right: max(10px, env(safe-area-inset-right));
+  z-index: 900;
+  padding: 0.55rem 0.7rem;
+  border-width: 2px;
+  border-radius: 9px;
+  box-shadow: 0 3px 0 #6f4d28;
+  font-size: 0.78rem;
+  opacity: 0.82;
+}
+
+.music-toggle[hidden],
+.intro-skip[hidden],
+.intro-start[hidden],
+.intro-hint[hidden] {
+  display: none;
+}
+
+@media (max-width: 620px) {
+  .intro-start {
+    min-width: 190px;
+    padding: 0.8rem 1rem;
+  }
+
+  .music-toggle {
+    font-size: 0.72rem;
+  }
+}
