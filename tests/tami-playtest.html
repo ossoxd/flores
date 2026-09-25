@@ -1,0 +1,43 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tami · revisión de la misión</title>
+<link rel="stylesheet" href="/src/styles.css"><style>body{overflow:auto;display:block}#results{white-space:pre-wrap;padding:8px;font:14px monospace}#game{width:min(960px,100vw)}#game canvas{max-width:100%;height:auto}button{margin:6px;padding:8px}</style>
+<button id="intro">Ver diálogo</button><button id="quiz">Ver cuestionario</button><button id="check">Verificar misión completa</button><div id="results">Cargando…</div><div id="game"></div>
+<script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script><script type="module">
+import { ASSETS } from '/src/config/assets.js';
+import { GameScene } from '/src/scenes/GameScene.js';
+import { TAMI } from '/src/config/tami.js';
+import { createGameState } from '/src/core/gameState.js';
+const results=document.querySelector('#results');
+class Check extends GameScene {
+  preload(){for(const a of Object.values(ASSETS))a.type==='spritesheet'?this.load.spritesheet(a.key,a.url,{frameWidth:a.frameWidth,frameHeight:a.frameHeight}):this.load.image(a.key,a.url);}
+  create(){
+    super.create();this.player.body.reset(1088,225);this.cameras.main.stopFollow();this.cameras.main.centerOn(1000,220);
+    this.lines=[];results.textContent='Lista: Tami en la posición marcada.';
+    document.querySelector('#intro').onclick=()=>this.openTamiDialogue();
+    document.querySelector('#quiz').onclick=()=>this.openTamiQuiz();
+    document.querySelector('#check').onclick=()=>this.checkFlow();
+  }
+  record(ok,label){this.lines.push((ok?'PASS ':'FAIL ')+label);results.textContent=this.lines.join('\n');}
+  finishDialogue(){let guard=0;while(this.dialogue.isOpen&&guard++<60){this.dialogue.finishReveal();this.dialogue.next();}}
+  async submit(answers){for(const answer of answers){this.quiz.select(answer);this.quiz.next();}await new Promise(resolve=>this.time.delayedCall(1500,resolve));}
+  async checkFlow(){
+    const button=document.querySelector('#check');button.disabled=true;this.lines=[];
+    try {
+      this.quiz.close();this.dialoguePurpose=null;this.dialogue.close();this.state=createGameState();this.tamiVisit=0;
+      this.openTamiDialogue();this.record(this.dialoguePurpose==='tami-intro','Interacción con Tami abre introducción');
+      let fits=true;for(const line of TAMI.intro){this.dialogue.open([line]);this.dialogue.finishReveal();fits&&=this.dialogue.text.width<=650&&this.dialogue.text.y+this.dialogue.text.height<478;}
+      this.record(fits,'Texto del diálogo cabe junto al retrato');
+      this.finishDialogue();this.record(this.quiz.isOpen,'La hoja aparece al terminar el diálogo');
+      this.record(this.quiz.options.children[2].scrollWidth<=this.quiz.options.children[2].clientWidth,'Respuesta larga C cabe en la hoja');
+      await this.submit([2,0,0,1]);
+      this.record(this.dialoguePurpose==='tami-failure'&&!(this.state.keyFragments??[]).length,'Un error se evalúa al final y no da premio');
+      this.finishDialogue();this.record(this.quiz.isOpen&&this.quiz.index===0&&this.quiz.answers.length===0,'Reintento comienza con hoja vacía');
+      await this.submit([2,0,1,1]);
+      this.record(this.dialoguePurpose==='tami-success'&&this.state.keyFragments?.length===1,'Las cuatro correctas entregan una parte');
+      this.finishDialogue();
+      for(const expected of TAMI.repeat){this.openTamiDialogue();this.record(this.dialogue.flow.lines[0].text===expected.text,'Respuesta posterior: '+expected.text);this.finishDialogue();}
+      this.openTamiQuiz();this.record(!this.quiz.isOpen&&this.state.keyFragments.length===1,'No se repite la prueba ni se duplica la llave');
+    }catch(error){this.record(false,error.message);}finally{button.disabled=false;}
+  }
+}
+new Phaser.Game({type:Phaser.AUTO,width:960,height:540,parent:'game',pixelArt:true,physics:{default:'arcade'},scene:[Check]});
+</script></html>

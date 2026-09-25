@@ -1,0 +1,15 @@
+{
+  "name": "flores-amarillas",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "assets:install": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install-generated-assets.ps1",
+    "dev": "node scripts/dev-server.mjs",
+    "build": "node scripts/verify-static.mjs",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

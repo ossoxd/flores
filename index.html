@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#fff7e8" />
+    <title>Un jardín para ti</title>
+    <link rel="stylesheet" href="/src/styles.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <p id="loading-status" role="status" aria-live="polite">Cargando el jardín…</p>
+      <div id="game-root" aria-label="Juego de flores amarillas"></div>
+      <p class="game-help">Mover: WASD o flechas · Hablar: Enter · Saltar: Espacio</p>
+      <p class="orientation-hint">Gira tu teléfono para jugar cómodamente 🌻</p>
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

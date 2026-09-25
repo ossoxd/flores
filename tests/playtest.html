@@ -1,0 +1,31 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Prueba física del jardín</title>
+<style>body{margin:0;background:#fff7e8;font:16px monospace}#results{padding:12px;white-space:pre-wrap}canvas{max-width:100%;image-rendering:pixelated}</style>
+<div id="results">Probando las colisiones y animaciones reales de Phaser…</div><div id="game"></div>
+<script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
+<script type="module">
+import {ASSETS} from '/src/config/assets.js';
+import {createPlayer,animatePlayer} from '/src/entities/createPlayer.js';
+import {createGardenMap} from '/src/map/createGardenMap.js';
+import {GARDEN_LAYOUT} from '/src/map/gardenLayout.js';
+const results=document.querySelector('#results');
+const checks=[
+  {name:'Poste de entrada horizontal desde tierra',x:712,y:280,vx:0,vy:-180,ms:500,check:p=>p.y>=256},
+  {name:'Tronco sólido',x:512,y:335,vx:0,vy:-180,ms:500,check:p=>p.y>=313},
+  {name:'Acantilado sur',x:200,y:300,vx:0,vy:180,ms:700,check:p=>p.y<=336.1},
+  {name:'Entrada y salida puente vertical',x:352,y:300,vx:0,vy:180,ms:1700,check:p=>p.y>580},
+  {name:'Barandilla del puente',x:352,y:420,vx:180,vy:0,ms:500,check:p=>p.x<363},
+  {name:'Cruce horizontal',x:685,y:224,vx:180,vy:0,ms:1450,check:p=>p.x>920},
+  {name:'Salto y aterrizaje',x:352,y:290,vx:0,vy:0,ms:800,jump:true,check:(p,s)=>p.jumpStarted===null&&s.peak>28&&Math.abs(p.visual.y-p.y)<0.1},
+  ...[['left',-100,0],['right',100,0],['up',0,-100],['down',0,100]].map(([direction,vx,vy])=>({name:'Carrera '+direction,x:480,y:620,vx,vy,ms:350,check:p=>p.visual.anims.currentAnim.key==='run-'+direction&&Math.hypot(p.x-480,p.y-620)>20})),
+  ...['left','right','up','down'].map(direction=>({name:'Salto '+direction,x:352,y:620,vx:0,vy:0,ms:750,jump:true,direction,check:(p,s)=>p.jumpStarted===null&&s.peak>28&&p.visual.anims.currentAnim.key==='idle-'+direction})),
+  ...['left','right','up','down'].map(direction=>({name:'Idle '+direction,x:352,y:620,vx:0,vy:0,ms:350,direction,check:p=>p.visual.anims.currentAnim.key==='idle-'+direction})),
+  {name:'Puente hasta la isla del futuro NPC',x:1150,y:224,vx:180,vy:0,ms:1900,check:p=>p.x>1430&&Math.abs(p.y-224)<12}
+];
+class TestScene extends Phaser.Scene {
+ preload(){for(const a of Object.values(ASSETS))a.type==='spritesheet'?this.load.spritesheet(a.key,a.url,{frameWidth:a.frameWidth,frameHeight:a.frameHeight}):this.load.image(a.key,a.url);}
+ create(){const g=createGardenMap(this,GARDEN_LAYOUT);const {width,height}=GARDEN_LAYOUT.world;this.physics.world.setBounds(0,0,width,height);this.p=createPlayer(this,{x:200,y:300});for(const o of g.obstacles)this.physics.add.collider(this.p,o);this.cameras.main.setBounds(0,0,width,height).startFollow(this.p);this.index=-1;this.lines=[];this.next();}
+ next(){this.index++;if(this.index===checks.length){this.done=true;this.p.setVelocity(0,0);animatePlayer(this.p,0,0);results.textContent=this.lines.join('\n');return;}this.c=checks[this.index];this.p.body.reset(this.c.x,this.c.y);this.p.jumpStarted=null;this.p.lastDirection=this.c.direction||'down';this.peak=0;this.started=this.time.now;if(this.c.jump)this.p.jumpStarted=this.time.now;}
+ update(){if(this.done)return;const p=this.p,c=this.c;p.setVelocity(c.vx,c.vy);animatePlayer(p,c.vx,c.vy);this.peak=Math.max(this.peak,p.y-p.visual.y);if(this.time.now-this.started>=c.ms){const ok=c.check(p,this);this.lines.push((ok?'PASS':'FAIL')+' '+c.name+' ('+p.x.toFixed(1)+', '+p.y.toFixed(1)+')');results.textContent=this.lines.join('\n');this.next();}}
+}
+new Phaser.Game({type:Phaser.AUTO,width:960,height:540,parent:'game',pixelArt:true,physics:{default:'arcade',arcade:{debug:false}},scene:[TestScene]});
+</script></html>

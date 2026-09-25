@@ -1,0 +1,16 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Verificación del diálogo</title><style>body{margin:0;background:#fff7e8;font:16px monospace}#results{white-space:pre-wrap;padding:8px}canvas{max-width:100%}</style><div id="results">Verificando…</div><div id="game"></div>
+<script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script><script type="module">
+import {ASSETS} from '/src/config/assets.js';
+import {CONTENT} from '/src/config/content.js';
+import {DialogueBox} from '/src/ui/DialogueBox.js';
+class Test extends Phaser.Scene{
+preload(){for(const a of [ASSETS.girlPortraits,ASSETS.rabbitPortraits])this.load.spritesheet(a.key,a.url,{frameWidth:256,frameHeight:256});}
+create(){this.results=[];this.box=new DialogueBox(this,()=>{});let fit=true,faces=true;
+for(const line of CONTENT.rabbit){this.box.open([line]);this.box.finishReveal();fit&&=this.box.text.width<=650&&this.box.text.y+this.box.text.height<478;faces&&=this.box.portrait.texture.key===(line.speaker==='Anto'?'girl-portraits':'rabbit-portraits');}
+this.results.push((fit?'PASS':'FAIL')+' Todas las frases caben sin invadir retrato ni pie');this.results.push((faces?'PASS':'FAIL')+' Retratos cambian con el hablante');
+this.box.open(CONTENT.rabbit.slice(6));this.start=this.time.now;this.checked=false;
+this.time.delayedCall(1000,()=>{this.results.push((this.box.text.text!=='Puedo decir...'?'PASS':'FAIL')+' Puntos aparecen con pausa');this.report();});this.report();}
+report(){document.querySelector('#results').textContent=this.results.join('\n');}
+update(){if(this.checked||!this.box)return;if(this.box.flow.lines[this.box.flow.index]?.speaker==='Anto'){this.checked=true;this.results.push((this.box.flow.lines[this.box.flow.index].emotion==='angry'?'PASS':'FAIL')+' Interrupción automática después de Pantaloneta');this.report();}else if(this.time.now-this.start>16000){this.checked=true;this.results.push('FAIL Secuencia automática bloqueada');this.report();}}
+}new Phaser.Game({type:Phaser.AUTO,width:960,height:540,parent:'game',backgroundColor:'#d6bb83',scene:[Test]});
+</script></html>

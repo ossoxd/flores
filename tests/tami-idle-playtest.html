@@ -1,0 +1,23 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Tami idle</title>
+<style>body{background:#ffcc80;font:16px monospace}canvas{image-rendering:pixelated}#sheet{width:1536px;height:128px}#game{width:640px}pre{white-space:pre-wrap}</style>
+<div id="game"></div><canvas id="sheet" width="768" height="64"></canvas><pre id="status">Cargando</pre>
+<script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
+<script type="module">
+import { ASSETS } from '/src/config/assets.js';
+import { createTamiNpc } from '/src/entities/createTamiNpc.js';
+class Preview extends Phaser.Scene {
+ preload(){this.load.image(ASSETS.tami.key,ASSETS.tami.url);}
+ create(){
+  this.npc=createTamiNpc(this).sprite;
+  this.cameras.main.centerOn(this.npc.x,this.npc.y-28).setZoom(3);
+  const texture=this.textures.get('tami-idle-sheet').getSourceImage();
+  const context=document.querySelector('#sheet').getContext('2d');context.drawImage(texture,0,0);
+  document.querySelector('#status').textContent='Doce poses: cola baja, media, alta y parpadeo.';
+  this.start={x:this.npc.x,y:this.npc.y,bx:this.npc.body.x,by:this.npc.body.y};this.seen=new Set();
+  this.npc.on('animationupdate',()=>this.seen.add(this.npc.frame.name));
+  this.npc.on('animationrepeat',()=>{document.querySelector('#status').textContent=
+   `Ciclo completo; ${this.seen.size}/12 poses; posición y colisión fijas: ${this.npc.x===this.start.x&&this.npc.y===this.start.y&&this.npc.body.x===this.start.bx&&this.npc.body.y===this.start.by}`;});
+ }
+}
+new Phaser.Game({type:Phaser.AUTO,width:640,height:240,parent:'game',backgroundColor:'#ffcc80',pixelArt:true,physics:{default:'arcade'},scene:Preview});
+</script></html>

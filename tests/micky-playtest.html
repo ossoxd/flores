@@ -1,0 +1,78 @@
+<!doctype html><html lang="es"><meta charset="utf-8"><title>Micky · revisión</title>
+<link rel="stylesheet" href="/src/styles.css">
+<style>body{display:block;overflow:auto}#game{width:min(960px,100vw)}#game canvas{max-width:100%;height:auto}#results{white-space:pre-wrap;font:14px monospace;padding:8px}button{padding:8px;margin:4px}</style>
+<button id="dialogue">Ver diálogo</button><button id="race">Ver carrera</button><button id="check">Comprobar victoria</button><button id="loss">Comprobar derrota y salida</button>
+<div id="results">Cargando…</div><div id="game"></div>
+<script src="https://cdn.jsdelivr.net/npm/phaser@4.2.1/dist/phaser.min.js"></script>
+<script type="module">
+import { ASSETS } from '/src/config/assets.js';
+import { GameScene } from '/src/scenes/GameScene.js';
+import { MickyRaceScene } from '/src/scenes/MickyRaceScene.js';
+import { MICKY } from '/src/config/micky.js';
+const out=document.querySelector('#results');
+const wait=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+window.addEventListener('error',e=>out.textContent+='\nERROR '+e.message);
+window.addEventListener('unhandledrejection',e=>out.textContent+='\nERROR '+e.reason);
+class Check extends GameScene {
+  preload(){for(const a of Object.values(ASSETS))a.type==='spritesheet'?this.load.spritesheet(a.key,a.url,{frameWidth:a.frameWidth,frameHeight:a.frameHeight}):this.load.image(a.key,a.url);}
+  create(){
+    super.create();this.player.body.reset(MICKY.position.x-56,MICKY.position.y);
+    this.cameras.main.stopFollow();this.cameras.main.centerOn(MICKY.position.x,MICKY.position.y);
+    out.textContent='Listo. Micky está en la isla nueva.';
+    document.querySelector('#dialogue').onclick=()=>this.openMickyDialogue();
+    document.querySelector('#race').onclick=()=>this.openMickyRace();
+    document.querySelector('#check').onclick=()=>this.checkFlow();
+    document.querySelector('#loss').onclick=()=>this.checkLoss();
+  }
+  async checkFlow(){
+    const record=(ok,label)=>{out.textContent+='\n'+(ok?'PASS ':'FAIL ')+label;if(!ok)throw Error(label);};
+    try{
+      out.textContent='Revisión';
+      this.openMickyDialogue();record(this.dialoguePurpose==='micky-intro'&&this.dialogue.flow.lines.length>=10,'Diálogo inicial');
+      let i=0;while(this.dialogue.isOpen&&i++<60){this.dialogue.finishReveal();this.dialogue.next();}
+      const race=this.scene.get('micky-race');
+      for(let attempts=0;attempts<30&&!race.race;attempts++)await wait(100);
+      record(race.race.phase==='INTRO'&&this.scene.isPaused(),'Mapa pausado e intro visible');
+      race.tap();record(race.race.playerSpeed===28,'No acepta clics antes de empezar');
+      race.countDown();record(race.race.phase==='COUNTDOWN','Cuenta regresiva');
+      for(let frame=0;frame<60;frame++)race.update(0,50);
+      record(race.race.phase==='RACING','Empieza tras ¡YA!');
+      race.tap();record(race.race.playerSpeed>28,'Clic acelera');
+      race.race={...race.race,playerX:1046,catX:800,playerSpeed:125};
+      race.update(0,50);record(race.race.winner==='player','Anto puede ganar');
+      const catBefore=race.cat.x;race.update(0,50);
+      record(race.cat.x>catBefore,'Micky sigue acercándose brevemente tras la llegada');
+      for(let frame=0;frame<24;frame++)race.update(0,50);
+      record(race.dialogue.isOpen,'Micky habla después de ganar');
+      race.dialogue.finishReveal();race.dialogue.next();
+      record(this.state.keyFragments.includes('micky')&&race.race.phase==='REWARD','Premio al cerrar diálogo');
+      const count=this.state.keyFragments.length;this.completeMickyRace();record(this.state.keyFragments.length===count,'Premio no se duplica');
+      race.leave();await wait(100);this.openMickyDialogue();
+      record(this.dialoguePurpose==='micky-repeat'&&!this.scene.isActive('micky-race'),'No se repite la carrera');
+    }catch(e){out.textContent+='\nERROR '+(e.stack||e.message);}
+  }
+  async checkLoss(){
+    const record=(ok,label)=>{out.textContent+='\n'+(ok?'PASS ':'FAIL ')+label;if(!ok)throw Error(label);};
+    try{
+      out.textContent='Revisión de derrota';
+      this.openMickyRace();
+      const race=this.scene.get('micky-race');
+      for(let attempts=0;attempts<30&&!race.race;attempts++)await wait(100);
+      record(race.race.phase==='INTRO','Entrada a carrera');
+      race.leave();await wait(100);
+      record(!this.state.keyFragments?.includes('micky'),'Salir antes no concede la pieza');
+      this.openMickyRace();
+      for(let attempts=0;attempts<30&&(!race.scene.isActive()||race.race?.phase!=='INTRO');attempts++)await wait(100);
+      race.countDown();for(let frame=0;frame<60;frame++)race.update(0,50);
+      record(race.race.phase==='RACING','Se puede reintentar tras salir');
+      race.race={...race.race,playerX:800,catX:1048,playerSpeed:28};
+      race.update(0,50);record(race.race.winner==='cat','Micky llega primero');
+      for(let frame=0;frame<25;frame++)race.update(0,50);
+      record(race.dialogue.isOpen&&race.dialogue.flow.lines[0].text.includes('ni me esforcé'),`Diálogo de derrota correcto (${race.race.phase}, abierto=${race.dialogue.isOpen}, elapsed=${race.finishElapsed}, activo=${race.scene.isActive()})`);
+      race.dialogue.finishReveal();race.dialogue.next();
+      record(this.state.keyFragments.includes('micky'),'La derrota también concede la pieza');
+    }catch(e){out.textContent+='\nERROR '+(e.stack||e.message);}
+  }
+}
+new Phaser.Game({type:Phaser.AUTO,width:960,height:540,parent:'game',render:{pixelArt:true,antialias:false},physics:{default:'arcade'},scene:[Check,MickyRaceScene]});
+</script></html>

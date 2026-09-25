@@ -1,0 +1,435 @@
+@import url('./tami-fonts.css');
+
+:root {
+  color: #4a3426;
+  background: #fff7e8;
+  font-family: "Segoe UI", system-ui, sans-serif;
+}
+
+body.tami-quiz-open { touch-action: auto; }
+.coco-puzzle-open { overflow: hidden; }
+.coco-puzzle-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 12px;
+  overflow: auto;
+  background: rgb(23 35 30 / 82%);
+  touch-action: manipulation;
+}
+.coco-puzzle-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(720px, calc(100vw - 24px));
+  max-height: calc(100dvh - 24px);
+  padding: 20px 24px 22px;
+  border: 7px solid #58392d;
+  outline: 4px solid #d17943;
+  background: #fff0c9;
+  color: #4b2b20;
+  box-shadow: 0 12px 0 rgb(35 25 22 / 42%);
+  font-family: 'Tami Minecraft', monospace;
+  image-rendering: pixelated;
+}
+.coco-puzzle-card h2 {
+  margin: 0 38px 8px;
+  text-align: center;
+  font-size: clamp(17px, 3.5vw, 27px);
+  line-height: 1.3;
+}
+.coco-puzzle-instruction {
+  min-height: 2.6em;
+  margin: 0 0 12px;
+  text-align: center;
+  font-size: clamp(12px, 2.4vw, 16px);
+}
+.coco-puzzle-board {
+  position: relative;
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-rows: repeat(3, minmax(0, 1fr));
+  width: min(560px, 80vw, calc((100dvh - 245px) * 1.4));
+  aspect-ratio: 1484 / 1060;
+  gap: 3px;
+  padding: 3px;
+  border: 4px solid #664333;
+  background: #664333;
+  box-shadow: 0 5px 0 #b7824f;
+}
+.coco-puzzle-piece {
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  border: 0;
+  background-repeat: no-repeat;
+  background-size: 300% 300%;
+  image-rendering: pixelated;
+  cursor: pointer;
+  transition: filter 100ms steps(2), transform 100ms steps(2);
+  touch-action: manipulation;
+}
+.coco-puzzle-piece:hover { filter: brightness(1.1); }
+.coco-puzzle-piece.is-selected {
+  z-index: 1;
+  outline: 4px solid #ffd84c;
+  transform: scale(.94);
+}
+.coco-puzzle-close {
+  position: absolute;
+  top: 5px;
+  right: 8px;
+  width: 34px;
+  height: 34px;
+  border: 3px solid #58392d;
+  background: #ffd99b;
+  color: #58392d;
+  font-size: 24px;
+  cursor: pointer;
+}
+.coco-puzzle-complete-photo {
+  position: absolute;
+  z-index: 1;
+  inset: 3px;
+  width: calc(100% - 6px);
+  height: calc(100% - 6px);
+  object-fit: contain;
+  image-rendering: pixelated;
+  pointer-events: none;
+  animation: coco-photo-dissolve 1.3s ease-in-out .12s both;
+}
+.coco-puzzle-card.is-revealing .coco-puzzle-board {
+  animation: coco-photo-reveal 5s ease-out both;
+}
+.coco-puzzle-card.is-revealing .coco-puzzle-piece {
+  pointer-events: none;
+  filter: none;
+}
+.coco-puzzle-footer {
+  min-height: 64px;
+  flex-shrink: 0;
+  display: grid;
+  place-items: center;
+}
+.coco-puzzle-continue {
+  margin-top: 16px;
+  padding: 10px 18px;
+  border: 3px solid #58392d;
+  background: #ffdc96;
+  color: #4b2b20;
+  font: inherit;
+  cursor: pointer;
+}
+.coco-puzzle-continue:disabled { cursor: default; opacity: .65; }
+.coco-puzzle-continue:focus-visible { outline: 3px solid #bc5b49; outline-offset: 3px; }
+.coco-puzzle-celebration {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.coco-puzzle-heart {
+  position: absolute;
+  left: var(--x);
+  bottom: -30px;
+  width: 28px;
+  height: 26px;
+  background: #f45f85;
+  clip-path: polygon(0 17%,14% 17%,14% 0,43% 0,43% 17%,57% 17%,57% 0,86% 0,86% 17%,100% 17%,100% 50%,86% 50%,86% 67%,71% 67%,71% 83%,57% 83%,57% 100%,43% 100%,43% 83%,29% 83%,29% 67%,14% 67%,14% 50%,0 50%);
+  animation: coco-heart-rise 2.6s steps(24) var(--delay) both;
+}
+.coco-puzzle-heart:nth-child(8n + 5) { background: #ffcf60; }
+.coco-puzzle-confetti {
+  position: absolute;
+  left: var(--x);
+  top: 14%;
+  width: 6px;
+  height: 7px;
+  background: var(--color);
+  opacity: 0;
+  animation: coco-confetti-fall 1.25s steps(18) var(--delay) both;
+}
+.coco-puzzle-confetti:nth-child(3n) { width: 8px; height: 5px; }
+@keyframes coco-photo-reveal {
+  0% { box-shadow: 0 5px 0 #b7824f; }
+  25% { box-shadow: 0 0 42px 12px #ffe6a4aa; }
+  75% { box-shadow: 0 0 30px 8px #ffe6a477; }
+  100% { box-shadow: 0 5px 0 #b7824f; }
+}
+@keyframes coco-photo-dissolve {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes coco-heart-rise {
+  0% { bottom: -30px; opacity: 0; transform: scale(.6) rotate(-8deg); }
+  15% { opacity: 1; }
+  58% { transform: scale(1.1) rotate(8deg); }
+  80% { opacity: 1; }
+  100% { bottom: 82%; opacity: 0; transform: scale(.85) rotate(-8deg); }
+}
+@keyframes coco-confetti-fall {
+  0% { top: 14%; opacity: 0; transform: translateX(0) rotate(0); }
+  15% { opacity: 1; }
+  78% { opacity: 1; }
+  100% { top: 94%; opacity: 0; transform: translateX(var(--drift)) rotate(180deg); }
+}
+@media (max-width: 520px) {
+  .coco-puzzle-card { padding: 18px 12px 14px; }
+  .coco-puzzle-board { width: min(88vw, calc((100dvh - 245px) * 1.4)); }
+}
+.tami-quiz-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: flex;
+  overflow-y: auto;
+  padding: 12px;
+  background: rgb(36 25 24 / 65%);
+  touch-action: auto;
+}
+.tami-paper {
+  position: relative;
+  flex: none;
+  margin: auto;
+  width: min(800px, calc(100dvh - 24px), 100%);
+  aspect-ratio: 1;
+  color: #4b2b20;
+  background-image: var(--tami-paper-image);
+  background-size: 100% 100%;
+  background-repeat: no-repeat;
+  image-rendering: pixelated;
+  font-family: 'Tami Minecraft', sans-serif;
+}
+.tami-paper h2 {
+  position: absolute;
+  top: 15%; left: 18%; width: 68%; height: 19%;
+  display: grid; place-items: center;
+  margin: 0; text-align: center;
+  font-size: clamp(18px, 2.8vw, 24px);
+  line-height: 1.23;
+}
+.tami-options {
+  position: absolute;
+  top: 36.5%; left: 14%; width: 77%; height: 50%;
+  display: grid;
+  grid-template-rows: repeat(4, minmax(0, 1fr));
+}
+.tami-option {
+  position: relative;
+  width: 100%;
+  padding: 0 1% 0 17%;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  font-size: clamp(13px, 1.8vw, 16px);
+  line-height: 1.28;
+  text-align: left;
+  cursor: pointer;
+}
+.tami-option.is-selected::before {
+  content: '';
+  position: absolute;
+  left: 6%; top: 28%;
+  width: 14px; height: 25px;
+  transform: translate(-50%, -60%) rotate(45deg);
+  border: solid #4b2b20;
+  border-width: 0 5px 5px 0;
+}
+@media (min-width: 621px) {
+  .tami-option:nth-child(4).is-selected::before { top: 40%; }
+}
+.tami-option.is-long { font-size: 14px; line-height: 1.16; }
+.tami-option.is-long span { position: relative; top: -12px; }
+.tami-close { display: none; }
+.tami-next {
+  position: absolute;
+  left: 66%; bottom: 5%;
+  width: 26%; height: 11%;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+}
+.tami-next:disabled { cursor: default; }
+.tami-next[hidden] { display: none; }
+.tami-paper button:focus-visible { outline: 2px dashed #704428; outline-offset: 2px; }
+@media (max-width: 620px) {
+  .tami-quiz-overlay { padding: 4px; }
+  .tami-paper {
+    width: 100%; height: auto; min-height: calc(100dvh - 8px);
+    padding: 40px 20px 28px;
+    aspect-ratio: auto;
+    background: #fff0d2 !important;
+    border: 6px solid #573421;
+    box-shadow: inset 0 0 0 6px #f4d7aa;
+    clip-path: polygon(0 10px,10px 10px,10px 0,calc(100% - 10px) 0,calc(100% - 10px) 10px,100% 10px,100% calc(100% - 10px),calc(100% - 10px) calc(100% - 10px),calc(100% - 10px) 100%,10px 100%,10px calc(100% - 10px),0 calc(100% - 10px));
+  }
+  .tami-paper h2 {
+    position: static; display: grid;
+    width: 100%; height: auto; min-height: 110px;
+    padding: 0 4px 22px;
+    border-bottom: 3px solid #c69f76;
+    font-size: 20px;
+  }
+  .tami-close {
+    position: absolute;
+    display: block;
+    right: 13px; top: 8px;
+    border: 0; background: transparent;
+    color: #573421;
+    font: 27px Arial, sans-serif;
+    cursor: pointer;
+  }
+  .tami-close[hidden] { display: none; }
+  .tami-options { position: static; display: block; width: 100%; height: auto; }
+  .tami-option {
+    display: block; min-height: 112px;
+    padding: 20px 4px 20px 60px;
+    border-bottom: 2px solid #d5b790;
+    font-size: 14px; line-height: 1.35;
+  }
+  .tami-option::before, .tami-option.is-selected::before {
+    content: '';
+    position: absolute;
+    left: 8px; top: 50%;
+    width: 30px; height: 30px;
+    transform: translateY(-50%);
+    border: 3px solid #573421;
+  }
+  .tami-option.is-selected::after {
+    content: '';
+    position: absolute;
+    left: 27px; top: 50%;
+    width: 11px; height: 20px;
+    transform: translate(-50%, -60%) rotate(45deg);
+    border: solid #4b2b20;
+    border-width: 0 4px 4px 0;
+  }
+  .tami-option.is-long span { top: 0; }
+  .tami-next {
+    position: static; display: block;
+    width: 100px; height: 42px;
+    margin: 20px 0 0 auto;
+    background-image: var(--tami-paper-image);
+    background-size: 400px 400px;
+    background-position: -277px -333px;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  width: 100%;
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  display: grid;
+  place-items: center;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top, #fffdf6 0%, #fff7e8 48%, #f4e2b8 100%);
+  touch-action: none;
+}
+
+.app-shell {
+  display: grid;
+  justify-items: center;
+  width: min(100vw, 1100px);
+  gap: 0.65rem;
+  padding: 1rem;
+}
+
+#game-root {
+  display: grid;
+  place-items: center;
+  width: 100%;
+  height: min(56.25vw, 620px);
+  min-height: 0;
+}
+
+#game-root canvas {
+  display: block;
+  max-width: 100%;
+  max-height: calc(100vh - 7rem);
+  border: 4px solid #e6b83f;
+  border-radius: 18px;
+  box-shadow: 0 18px 45px rgb(91 63 30 / 22%);
+  image-rendering: pixelated;
+}
+
+#loading-status,
+.game-help {
+  margin: 0;
+  color: #4a3426;
+  background: #fff7e8;
+}
+
+.game-help {
+  font-size: 0.9rem;
+}
+
+.orientation-hint {
+  display: none;
+  margin: 0;
+  padding: 0.55rem 0.8rem;
+  border: 2px solid #e6b83f;
+  border-radius: 999px;
+  color: #4a3426;
+  background: #fff7e8;
+  font-weight: 650;
+  text-align: center;
+}
+
+@media (max-width: 620px) {
+  .app-shell {
+    padding: 0.35rem;
+    gap: 0.35rem;
+  }
+
+  .game-help {
+    font-size: 0.75rem;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 620px) {
+  .orientation-hint {
+    display: block;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 500px) {
+  .app-shell {
+    height: 100vh;
+    padding: 0.25rem;
+    gap: 0;
+  }
+
+  #game-root {
+    width: 100%;
+    height: calc(100vh - 0.5rem);
+  }
+
+  #game-root canvas {
+    width: auto !important;
+    height: 100% !important;
+    max-width: 100%;
+    max-height: 100%;
+  }
+
+  #loading-status,
+  .game-help {
+    display: none;
+  }
+}
